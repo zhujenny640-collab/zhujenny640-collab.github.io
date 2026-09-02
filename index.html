@@ -1,0 +1,632 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#18382f">
+  <meta name="description" content="九月山水寺观慢游候选：看图，凭直觉选出最想去的三个地方。">
+  <title>九月，去山里待几天</title>
+  <style>
+    :root {
+      --ink: #17352e;
+      --ink-soft: #567068;
+      --paper: #f4f0e7;
+      --paper-deep: #e9e1d2;
+      --cinnabar: #9b4936;
+      --moss: #6c8066;
+      --gold: #bf9b5d;
+      --line: rgba(23, 53, 46, .14);
+      --shadow: 0 24px 70px rgba(13, 39, 32, .15);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; background: #102c25; color: var(--ink); }
+    body {
+      font-family: "Songti SC", "STSong", "Noto Serif SC", "PingFang SC", serif;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    button { font: inherit; }
+    .deck {
+      display: flex;
+      width: 100vw;
+      height: 100svh;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      overscroll-behavior-x: contain;
+      scrollbar-width: none;
+      background:
+        radial-gradient(circle at 10% 0%, rgba(126,157,139,.32), transparent 32%),
+        linear-gradient(145deg, #183a31 0%, #0e2721 100%);
+    }
+    .deck::-webkit-scrollbar { display: none; }
+    .panel {
+      position: relative;
+      flex: 0 0 100vw;
+      width: 100vw;
+      height: 100svh;
+      overflow-y: auto;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      background: var(--paper);
+      scrollbar-width: none;
+    }
+    .panel::-webkit-scrollbar { display: none; }
+    .paper-grain::after {
+      content: "";
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      opacity: .22;
+      background-image:
+        repeating-radial-gradient(circle at 17% 29%, rgba(23,53,46,.12) 0 .45px, transparent .6px 5px),
+        repeating-radial-gradient(circle at 73% 61%, rgba(155,73,54,.08) 0 .35px, transparent .55px 7px);
+      background-size: 37px 31px, 43px 47px;
+      mix-blend-mode: multiply;
+      z-index: 20;
+    }
+    .cover {
+      display: grid;
+      min-height: 100%;
+      padding: max(34px, env(safe-area-inset-top)) 26px max(28px, env(safe-area-inset-bottom));
+      color: #f3efe6;
+      background:
+        linear-gradient(180deg, rgba(9,31,26,.15), rgba(9,31,26,.92)),
+        url("assets/photos/九华山/1.jpg") center/cover;
+    }
+    .cover-top { align-self: start; display: flex; justify-content: space-between; align-items: center; }
+    .eyebrow { letter-spacing: .18em; font: 600 12px/1.3 "PingFang SC", sans-serif; text-transform: uppercase; }
+    .seal { width: 46px; height: 46px; border: 1px solid rgba(255,255,255,.6); display: grid; place-items: center; color: #f4d5c9; font-size: 13px; line-height: 1.05; text-align: center; }
+    .cover-main { align-self: end; padding-bottom: 4vh; }
+    .cover h1 { margin: 0 0 16px; font-size: clamp(42px, 12vw, 68px); line-height: 1.08; font-weight: 500; letter-spacing: -.04em; }
+    .cover .lead { max-width: 31em; margin: 0; font: 400 17px/1.8 "PingFang SC", sans-serif; color: rgba(255,255,255,.88); }
+    .cover-rule { width: 52px; height: 2px; margin: 28px 0 20px; background: #d6b57b; }
+    .howto { padding: 16px 18px; border: 1px solid rgba(255,255,255,.22); background: rgba(255,255,255,.08); backdrop-filter: blur(8px); font: 14px/1.65 "PingFang SC", sans-serif; }
+    .swipe-hint { margin-top: 22px; display: flex; gap: 10px; align-items: center; font: 13px/1 "PingFang SC", sans-serif; color: rgba(255,255,255,.74); }
+    .arrow { display: inline-block; animation: nudge 1.7s ease-in-out infinite; }
+    @keyframes nudge { 50% { transform: translateX(7px); } }
+
+    .destination { padding-bottom: calc(92px + env(safe-area-inset-bottom)); }
+    .gallery {
+      position: relative;
+      height: min(44svh, 390px);
+      min-height: 300px;
+      overflow: hidden;
+      background: #d8d4c8;
+    }
+    .gallery-grid { height: 100%; display: grid; grid-template-columns: 1fr 34%; grid-template-rows: 1fr 1fr; gap: 3px; }
+    .gallery-grid.one { display: block; }
+    .gallery-grid.two { grid-template-columns: 1fr 34%; grid-template-rows: 1fr; }
+    .gallery img { width: 100%; height: 100%; display: block; object-fit: cover; background: #d5d1c5; }
+    .gallery img:first-child { grid-row: 1 / -1; }
+    .gallery::after { content: ""; position: absolute; inset: 40% 0 0; background: linear-gradient(transparent, rgba(12,32,27,.84)); pointer-events: none; }
+    .place-heading { position: absolute; z-index: 2; left: 22px; right: 22px; bottom: 20px; color: white; }
+    .place-num { font: 600 11px/1 "PingFang SC", sans-serif; letter-spacing: .17em; color: #e2c28b; }
+    .place-heading h2 { margin: 8px 0 3px; font-size: clamp(34px, 10vw, 50px); line-height: 1; font-weight: 500; text-shadow: 0 2px 18px rgba(0,0,0,.34); }
+    .place-heading p { margin: 8px 0 0; font: 14px/1.45 "PingFang SC", sans-serif; color: rgba(255,255,255,.87); }
+    .photo-credit { position: absolute; z-index: 3; top: 14px; left: 14px; padding: 6px 9px; border-radius: 999px; background: rgba(6,24,19,.55); color: rgba(255,255,255,.82); font: 10px/1 "PingFang SC", sans-serif; text-decoration: none; backdrop-filter: blur(7px); }
+    .content { padding: 24px 22px 14px; }
+    .verdict { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 22px; padding: 15px 16px; border-left: 3px solid var(--cinnabar); background: rgba(155,73,54,.055); font: 500 15px/1.65 "PingFang SC", sans-serif; }
+    .verdict .mark { color: var(--cinnabar); font-size: 21px; line-height: 1.1; }
+    .copy p { margin: 0 0 15px; font: 15px/1.85 "PingFang SC", sans-serif; color: #354e47; text-align: justify; }
+    .copy strong { color: var(--ink); font-weight: 650; }
+    .contrast { margin: 19px 0; padding: 15px 16px; border-radius: 2px; background: var(--ink); color: #f3eee3; font: 500 15px/1.8 "PingFang SC", sans-serif; }
+    .ratings { margin-top: 27px; padding-top: 21px; border-top: 1px solid var(--line); }
+    .ratings-title { margin: 0 0 14px; display: flex; justify-content: space-between; align-items: baseline; }
+    .ratings-title b { font: 600 14px/1 "PingFang SC", sans-serif; letter-spacing: .08em; }
+    .grade { color: var(--cinnabar); font: 700 23px/1 Georgia, serif; }
+    .rating-row { display: grid; grid-template-columns: 7.2em 1fr 2.2em; gap: 10px; align-items: center; margin: 11px 0; font: 13px/1.1 "PingFang SC", sans-serif; }
+    .stars { position: relative; display: inline-block; width: 6.1em; letter-spacing: .14em; font-size: 15px; color: #d7d0c1; white-space: nowrap; }
+    .stars-fill { position: absolute; inset: 0 auto 0 0; overflow: hidden; color: var(--gold); white-space: nowrap; }
+    .score { text-align: right; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+    .pick-button {
+      position: fixed;
+      z-index: 15;
+      right: 18px;
+      bottom: max(18px, env(safe-area-inset-bottom));
+      min-width: 120px;
+      padding: 13px 18px;
+      border: 1px solid rgba(255,255,255,.72);
+      border-radius: 999px;
+      background: rgba(23,53,46,.94);
+      color: white;
+      box-shadow: 0 10px 35px rgba(11,30,25,.28);
+      font: 600 14px/1 "PingFang SC", sans-serif;
+      backdrop-filter: blur(10px);
+    }
+    .pick-button[aria-pressed="true"] { background: var(--cinnabar); }
+    .pick-button:active { transform: translateY(1px); }
+
+    .summary { padding: max(34px, env(safe-area-inset-top)) 20px max(42px, env(safe-area-inset-bottom)); background: var(--paper); }
+    .summary-head { padding: 0 4px 18px; }
+    .summary h2 { margin: 10px 0 10px; font-size: 34px; font-weight: 500; }
+    .summary .sub { margin: 0; font: 14px/1.75 "PingFang SC", sans-serif; color: var(--ink-soft); }
+    .my-picks { margin: 20px 0 26px; padding: 20px; background: var(--ink); color: white; box-shadow: var(--shadow); }
+    .my-picks-label { font: 600 11px/1 "PingFang SC", sans-serif; letter-spacing: .17em; color: #d6b57b; }
+    .my-picks-text { min-height: 60px; margin: 15px 0; font-size: 24px; line-height: 1.55; }
+    .empty { color: rgba(255,255,255,.55); font: 14px/1.7 "PingFang SC", sans-serif; }
+    .copy-button { width: 100%; padding: 12px; border: 1px solid rgba(255,255,255,.4); background: transparent; color: white; font: 600 13px/1 "PingFang SC", sans-serif; }
+    .table-title { margin: 27px 4px 13px; font-size: 20px; font-weight: 500; }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); background: rgba(255,255,255,.34); }
+    table { width: 750px; border-collapse: collapse; font: 12px/1.45 "PingFang SC", sans-serif; }
+    th, td { padding: 12px 10px; border-bottom: 1px solid var(--line); text-align: center; white-space: nowrap; }
+    th { position: sticky; top: 0; background: #e8e1d4; color: #405a52; font-weight: 600; }
+    td:first-child, th:first-child { position: sticky; left: 0; z-index: 2; text-align: left; background: #f1ede4; font-weight: 650; }
+    tr:last-child td { border-bottom: 0; }
+    .table-note { margin: 10px 3px 0; color: var(--ink-soft); font: 11px/1.5 "PingFang SC", sans-serif; }
+    .closing { margin: 30px 4px 0; padding: 20px 0 0; border-top: 1px solid var(--line); color: #405850; font: 14px/1.8 "PingFang SC", sans-serif; }
+    .progress {
+      position: fixed;
+      z-index: 16;
+      left: 50%;
+      bottom: max(21px, env(safe-area-inset-bottom));
+      transform: translateX(-50%);
+      display: flex;
+      gap: 6px;
+      padding: 7px 9px;
+      border-radius: 99px;
+      background: rgba(9,30,25,.62);
+      backdrop-filter: blur(9px);
+    }
+    .dot { width: 5px; height: 5px; border: 0; padding: 0; border-radius: 50%; background: rgba(255,255,255,.38); }
+    .dot.active { width: 15px; border-radius: 9px; background: #e2c38e; }
+    .toast { position: fixed; z-index: 30; left: 50%; top: max(20px, env(safe-area-inset-top)); transform: translate(-50%, -15px); opacity: 0; pointer-events: none; padding: 10px 15px; border-radius: 99px; background: rgba(23,53,46,.95); color: white; font: 13px/1 "PingFang SC", sans-serif; transition: .25s ease; }
+    .toast.show { transform: translate(-50%, 0); opacity: 1; }
+    @media (min-width: 760px) {
+      .panel { flex-basis: min(480px, 100vw); width: min(480px, 100vw); border-right: 1px solid rgba(255,255,255,.12); }
+      .deck { scroll-padding-inline: calc((100vw - min(480px, 100vw))/2); padding-inline: calc((100vw - min(480px, 100vw))/2); }
+      .panel:first-child { margin-left: 0; }
+      .pick-button { right: calc((100vw - 480px)/2 + 18px); }
+    }
+    @media (prefers-reduced-motion: reduce) { .arrow { animation: none; } * { scroll-behavior: auto !important; } }
+
+    /* v2：目的地纵向阅读，卡内照片横向滑动。避免两层横滑抢手势。 */
+    html, body { height: auto; min-height: 100%; background: var(--paper); }
+    body { overflow-x: hidden; overflow-y: auto; }
+    .deck {
+      display: block;
+      width: 100%;
+      height: auto;
+      overflow: visible;
+      padding: 0;
+      background: var(--paper);
+    }
+    .panel {
+      width: 100%;
+      height: auto;
+      min-height: 0;
+      overflow: visible;
+      border-right: 0;
+      scroll-snap-align: none;
+    }
+    .cover { min-height: 100svh; }
+    .destination {
+      padding: 0 0 54px;
+      border-bottom: 10px solid var(--paper-deep);
+      background: var(--paper);
+    }
+    .place-heading {
+      position: static;
+      padding: 34px 22px 22px;
+      color: var(--ink);
+      background: var(--paper);
+    }
+    .place-num { color: var(--cinnabar); }
+    .place-heading h2 { margin-top: 10px; color: var(--ink); text-shadow: none; }
+    .place-heading p { color: var(--ink-soft); font-size: 14px; }
+    .gallery {
+      height: auto;
+      min-height: 0;
+      overflow: hidden;
+      background: #d5d3ca;
+    }
+    .gallery::after { display: none; }
+    .gallery-track {
+      display: flex;
+      width: 100%;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      overscroll-behavior-x: contain;
+      scrollbar-width: none;
+      touch-action: pan-x;
+    }
+    .gallery-track::-webkit-scrollbar { display: none; }
+    .photo-slide {
+      position: relative;
+      flex: 0 0 100%;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      margin: 0;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      overflow: hidden;
+      background: #c9cdc5;
+    }
+    .photo-slide::after {
+      content: "";
+      position: absolute;
+      inset: 58% 0 0;
+      background: linear-gradient(transparent, rgba(8,25,21,.68));
+      pointer-events: none;
+    }
+    .photo-slide img { width: 100%; height: 100%; display: block; object-fit: cover; }
+    .photo-caption {
+      position: absolute;
+      z-index: 2;
+      left: 16px;
+      right: 74px;
+      bottom: 15px;
+      color: rgba(255,255,255,.94);
+      font: 12px/1.45 "PingFang SC", sans-serif;
+    }
+    .photo-credit {
+      top: auto;
+      left: auto;
+      right: 14px;
+      bottom: 14px;
+      background: rgba(6,24,19,.62);
+    }
+    .gallery-controls {
+      display: flex;
+      min-height: 48px;
+      padding: 12px 18px;
+      align-items: center;
+      justify-content: space-between;
+      background: #17352e;
+      color: white;
+    }
+    .gallery-dots { display: flex; gap: 7px; }
+    .gallery-dot { width: 7px; height: 7px; padding: 0; border: 0; border-radius: 50%; background: rgba(255,255,255,.28); }
+    .gallery-dot.active { width: 20px; border-radius: 7px; background: #dfbd82; }
+    .gallery-counter { font: 12px/1 "PingFang SC", sans-serif; color: rgba(255,255,255,.74); font-variant-numeric: tabular-nums; }
+    .gallery-hint { margin-left: auto; margin-right: 14px; font: 11px/1 "PingFang SC", sans-serif; color: rgba(255,255,255,.56); }
+    .content { padding-top: 27px; }
+    .pick-button {
+      position: static;
+      display: block;
+      width: calc(100% - 44px);
+      margin: 28px 22px 0;
+      padding: 15px 18px;
+      border: 0;
+      border-radius: 2px;
+      box-shadow: none;
+    }
+    .summary { min-height: 100svh; }
+    .progress { display: none !important; }
+    .selection-status {
+      position: fixed;
+      z-index: 18;
+      right: 14px;
+      top: max(14px, env(safe-area-inset-top));
+      padding: 10px 13px;
+      border: 1px solid rgba(255,255,255,.5);
+      border-radius: 999px;
+      background: rgba(23,53,46,.9);
+      color: white;
+      box-shadow: 0 9px 30px rgba(8,28,22,.2);
+      font: 600 12px/1 "PingFang SC", sans-serif;
+      backdrop-filter: blur(10px);
+    }
+    .selection-status b { color: #e3c28b; }
+    @media (min-width: 760px) {
+      body { background: #17352e; }
+      .deck { max-width: 520px; margin: 0 auto; box-shadow: 0 0 80px rgba(0,0,0,.25); }
+      .panel { width: 100%; }
+      .selection-status { right: calc((100vw - 520px)/2 + 14px); }
+    }
+
+    /* v3：目的地卡片横滑；卡内照片相册横滑。 */
+    html, body { height: 100%; min-height: 100%; background: #102c25; }
+    body { overflow: hidden; }
+    .deck {
+      display: flex;
+      width: 100vw;
+      max-width: none;
+      height: 100svh;
+      margin: 0;
+      padding: 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      overscroll-behavior-x: contain;
+      scrollbar-width: none;
+      background: #102c25;
+      box-shadow: none;
+    }
+    .panel {
+      flex: 0 0 100vw;
+      width: 100vw;
+      height: 100svh;
+      overflow-x: hidden;
+      overflow-y: auto;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      border: 0;
+    }
+    .cover { min-height: 100svh; }
+    .destination { padding-bottom: calc(34px + env(safe-area-inset-bottom)); border-bottom: 0; }
+    .summary { min-height: 100svh; }
+    .photo-slide {
+      isolation: isolate;
+      aspect-ratio: 4 / 3;
+      background: #122e27;
+    }
+    .photo-slide::before {
+      content: "";
+      position: absolute;
+      z-index: 0;
+      inset: -20px;
+      background-image: var(--photo-bg);
+      background-position: center;
+      background-size: cover;
+      filter: blur(16px) brightness(.58) saturate(.88);
+      transform: scale(1.08);
+    }
+    .photo-slide img { position: relative; z-index: 1; object-fit: contain; }
+    .photo-slide::after { z-index: 1; }
+    .photo-caption, .photo-credit { z-index: 2; }
+    .gallery-arrow {
+      position: absolute;
+      z-index: 4;
+      top: 50%;
+      width: 34px;
+      height: 52px;
+      margin-top: -26px;
+      border: 0;
+      background: rgba(9,29,24,.55);
+      color: white;
+      font: 300 24px/1 "PingFang SC", sans-serif;
+      backdrop-filter: blur(7px);
+    }
+    .gallery-arrow.prev { left: 0; border-radius: 0 4px 4px 0; }
+    .gallery-arrow.next { right: 0; border-radius: 4px 0 0 4px; }
+    .gallery-arrow:disabled { opacity: .2; }
+    .gallery { position: relative; }
+    .gallery-track {
+      overflow: visible;
+      scroll-snap-type: none;
+      overscroll-behavior: none;
+      touch-action: pan-y;
+      transform: translateX(calc(var(--photo-index, 0) * -100%));
+      transition: transform .32s cubic-bezier(.22,.7,.25,1);
+      will-change: transform;
+    }
+    .photo-slide { scroll-snap-align: none; scroll-snap-stop: normal; }
+    .pick-button { margin-bottom: 4px; }
+    @media (min-width: 760px) {
+      .panel { flex-basis: min(520px, 100vw); width: min(520px, 100vw); }
+      .deck { padding-inline: calc((100vw - min(520px, 100vw))/2); scroll-padding-inline: calc((100vw - min(520px, 100vw))/2); }
+      .selection-status { right: calc((100vw - 520px)/2 + 14px); }
+    }
+  </style>
+</head>
+<body class="paper-grain">
+  <main class="deck" id="deck" aria-label="九月旅行候选卡片"></main>
+  <nav class="progress" id="progress" aria-label="页面进度"></nav>
+  <button class="selection-status" id="selectionStatus" type="button" aria-label="查看已选目的地">已选 <b>0</b> / 3</button>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const metricLabels = ["静下来", "山岳感", "寺院 / 道观", "5天慢住", "沪杭分别出发"];
+    const localPhotos = (folder, count) => Array.from({length: count}, (_, i) => ({
+      src: globalThis.__EMBEDDED_PHOTOS__?.[folder]?.[i] || `assets/photos/${folder}/${i + 1}.jpg`,
+      label: `${folder} · ${i + 1} / ${count}`
+    }));
+    const places = [
+      {
+        name: "武当山", tag: "真正离开江南，去一座有强烈精神气质的大山", grade: "S−",
+        verdict: "最符合“山中道观”的想象。",
+        paragraphs: [
+          "武当的“山”和“道”是融在一起的：不是爬完山顺便看个道观，而是整个山岳空间本身就是道教文化景观。古建筑群依山就势，山岳感和精神气质都很强。",
+          "它的问题只有一个：远。上海和杭州出发都不像皖南、浙南这么轻松，所以 5 天里交通会吃掉更多时间。但反过来说，正因为远，它的“真的离开日常生活了”的感觉也会最强。"
+        ],
+        contrast: "武当＝专程去武当。宏大、庄严，目的地感最强。",
+        ratings: [5,5,5,4,3],
+        photos: localPhotos("武当山", 7)
+      },
+      {
+        name: "九华山＋青阳", tag: "住进佛教名山，听寺院钟声，慢慢走", grade: "S",
+        verdict: "如果想在山里住几天，让脑子安静下来，九华山很强。",
+        paragraphs: [
+          "这个方向的核心就是九华山＋青阳。它和武当最大的差别很清楚：武当偏“道”，九华偏“佛”。",
+          "如果真正追求的是“在山里住几天，早晚走走，看看寺院，让脑子安静下来”，九华山非常贴题。山、寺庙和村镇生活感都在，5 天不用塞得很满，也不必一直打卡。"
+        ],
+        contrast: "武当：道。九华：佛。九华更像住进一座山中寺院群。",
+        ratings: [5,4,5,5,5],
+        photos: localPhotos("九华山", 7)
+      },
+      {
+        name: "齐云山＋徽州", tag: "住在山和徽州村落之间，喝茶、散步、看道观", grade: "S",
+        verdict: "几乎就是按“爬山、看道观、住下来待待”这句话长出来的。",
+        paragraphs: [
+          "齐云山是道教名山，但不像武当那么宏大、庄严、目的地感极强。它更小、更松弛，山上还有月华街这样的生活空间。",
+          "而且皖南特别适合把 5 天做得很松：不想爬了就去徽州村子里住；想喝茶就喝茶；下午什么都不干也成立。它不只是“爬一座山”，而是有一种人在山里生活的感觉。"
+        ],
+        contrast: "武当是“专程去武当”；齐云山是“去皖南住几天，顺便把自己安顿下来”。",
+        ratings: [5,4,5,5,4.5],
+        photos: localPhotos("齐云山", 7)
+      },
+      {
+        name: "雁荡山", tag: "最漂亮、最省心，但“静气”不是最突出", grade: "A−",
+        verdict: "更像“去玩一座名山”，而不是“去山里待着”。",
+        paragraphs: [
+          "雁荡当然很好看，而且交通对上海、杭州分别出发非常友好。灵峰、大龙湫、灵岩、方洞，一个个景区跑下来，会自然进入旅游模式。",
+          "如果想要的是“哇，这山真漂亮”，选雁荡；如果想的是“找个地方待五天，让脑子安静”，它不会排第一。整整 5 天只放雁荡山略单一，更适合搭配楠溪江，做成山水慢游。"
+        ],
+        contrast: "雁荡的核心竞争力是奇峰、瀑布、峡谷——看山很强，慢住感稍弱。",
+        ratings: [3.5,5,2.5,3,5],
+        photos: localPhotos("雁荡山", 6)
+      },
+      {
+        name: "龙虎山＋景德镇", tag: "正统道教文化＋丹霞山水＋陶瓷日常", grade: "A−",
+        verdict: "道观很对，但整体旅游感比齐云山强。",
+        paragraphs: [
+          "龙虎山有正统道教文化，也有丹霞地貌和泸溪河，所以不是纯宗教型目的地。简单说：武当宏大，龙虎正统道教文化＋丹霞山水，齐云清幽。",
+          "如果只有 5 天，很适合顺带景德镇，于是行程会从山水、道观、古镇，切换到陶瓷、小店、咖啡和闲逛。优点是每天质感不同，不容易审美疲劳；代价是它会变成一趟内容丰富的旅行，而不是纯粹在山里待着。"
+        ],
+        contrast: "山水 → 道观 → 古镇 → 陶瓷。丰富、有变化，但没那么“只在山里”。",
+        ratings: [4,4,5,4,3.5],
+        photos: localPhotos("龙虎山", 6)
+      },
+      {
+        name: "三清山", tag: "山本身可能是这一批里最“仙”的", grade: "A",
+        verdict: "更偏“去看一座非常漂亮的山”，而不是“找地方住下来”。",
+        paragraphs: [
+          "花岗岩奇峰＋云海，视觉上非常容易出现“仙山”的感觉；山里也有道教文化和三清宫。",
+          "但是它的核心竞争力还是山景。它和雁荡是一类竞争关系：都是去看真正漂亮的山。三清山的“仙气”更强，前提是愿意多花一些交通时间。"
+        ],
+        contrast: "如果这次最想要的是壮丽山景，三清山会很靠前；寺观慢住不是它的第一标签。",
+        ratings: [4,5,3,4,3.5],
+        photos: localPhotos("三清山", 6)
+      },
+      {
+        name: "武夷山", tag: "山、水、茶、人文都完整的成熟度假目的地", grade: "A",
+        verdict: "舒服、完整，但山中寺观的精神气质没有前三个强。",
+        paragraphs: [
+          "武夷山当然非常适合 5 天，而且山、水、茶、人文都很完整：喝茶、坐竹筏、爬山，节奏舒服。",
+          "但对照“山中寺观＋安静待着”的需求，它有一点太成熟的度假目的地了。它很好玩、很好住，只是齐云山、九华山、武当山的精神气质更强。"
+        ],
+        contrast: "想要山水、茶与度假的完整组合，选武夷；想要寺观与静气，它不占第一。",
+        ratings: [4,5,3,5,4],
+        photos: localPhotos("武夷山", 7)
+      }
+    ];
+
+    const deck = document.getElementById("deck");
+    const progress = document.getElementById("progress");
+    const toast = document.getElementById("toast");
+    const selectionStatus = document.getElementById("selectionStatus");
+    const selected = new Set(JSON.parse(localStorage.getItem("mountainTripPicks") || "[]"));
+
+    const stars = score => `<span class="stars" aria-label="${score} 分"><span>★★★★★</span><span class="stars-fill" style="width:${score/5*100}%">★★★★★</span></span>`;
+    const imageGridClass = n => n === 1 ? "one" : n === 2 ? "two" : "";
+
+    function coverHTML() {
+      return `<section class="panel cover" data-page="cover">
+        <div class="cover-top"><span class="eyebrow">September · 5 days</span><span class="seal">山水<br>慢游</span></div>
+        <div class="cover-main">
+          <h1>九月，<br>去山里待几天</h1>
+          <div class="cover-rule"></div>
+          <p class="lead">上海与杭州分别出发。山水为主，山中或附近有寺院、道观、古建；可以爬山，也可以住下来，让人慢一点。</p>
+          <div class="howto"><b>先不看攻略，凭直觉选。</b><br>向左滑，看完 7 个候选；每个地方可在图片区域左右滑看 6–7 张图，最后勾出最想去的 3 个。</div>
+          <div class="swipe-hint">向左滑动开始 <span class="arrow">→</span></div>
+        </div>
+      </section>`;
+    }
+
+    function placeHTML(place, i) {
+      const imgs = place.photos.map((p, j) => `<figure class="photo-slide" style="--photo-bg:url('${encodeURI(p.src)}')">
+        <img src="${encodeURI(p.src)}" alt="${place.name}：${p.label || `风景照片 ${j+1}`}" ${i > 0 || j > 0 ? 'loading="lazy"' : ''}>
+        <figcaption class="photo-caption">${p.label || place.name}</figcaption>
+      </figure>`).join("");
+      const rows = place.ratings.map((score, idx) => `<div class="rating-row"><span>${metricLabels[idx]}</span>${stars(score)}<span class="score">${score}</span></div>`).join("");
+      return `<section class="panel destination" data-page="${i+1}" data-name="${place.name}">
+        <div class="place-heading"><span class="place-num">候选 ${String(i+1).padStart(2,"0")} / ${String(places.length).padStart(2,"0")}</span><h2>${place.name}</h2><p>${place.tag}</p></div>
+        <div class="gallery">
+          <button class="gallery-arrow prev" data-photo-step="-1" type="button" aria-label="上一张照片" disabled>‹</button>
+          <div class="gallery-track" data-gallery-track>${imgs}</div>
+          <button class="gallery-arrow next" data-photo-step="1" type="button" aria-label="下一张照片">›</button>
+          <div class="gallery-controls">
+            <div class="gallery-dots">${place.photos.map((_,j) => `<button class="gallery-dot ${j===0?'active':''}" data-photo-go="${j}" aria-label="查看第 ${j+1} 张照片"></button>`).join("")}</div>
+            <span class="gallery-hint">左右滑看图</span>
+            <span class="gallery-counter"><b>1</b> / ${place.photos.length}</span>
+          </div>
+        </div>
+        <div class="content">
+          <div class="verdict"><span class="mark">丨</span><span>${place.verdict}</span></div>
+          <div class="copy">${place.paragraphs.map(p => `<p>${p}</p>`).join("")}</div>
+          <div class="contrast">${place.contrast}</div>
+          <div class="ratings"><div class="ratings-title"><b>五项评分</b><span class="grade">${place.grade}</span></div>${rows}</div>
+        </div>
+        <button class="pick-button" aria-pressed="${selected.has(place.name)}" data-pick="${place.name}">${selected.has(place.name) ? "✓ 已选" : "＋ 想去"}</button>
+      </section>`;
+    }
+
+    function summaryHTML() {
+      const tableRows = places.map(p => `<tr><td>${p.name}</td>${p.ratings.map(v => `<td>${v}</td>`).join("")}<td><b>${p.grade}</b></td></tr>`).join("");
+      return `<section class="panel summary" data-page="summary">
+        <div class="summary-head"><span class="eyebrow">Your Top 3</span><h2>看完了，选哪三个？</h2><p class="sub">选择没有标准答案。先看“想不想去”，交通、天气、强度、住宿和预算留给下一轮比较。</p></div>
+        <div class="my-picks"><div class="my-picks-label">我的直觉选择</div><div class="my-picks-text" id="myPicks"></div><button class="copy-button" id="copyPicks">复制选择结果</button></div>
+        <h3 class="table-title">全部候选 · 评分汇总</h3>
+        <div class="table-wrap"><table><thead><tr><th>目的地</th>${metricLabels.map(m => `<th>${m}</th>`).join("")}<th>综合</th></tr></thead><tbody>${tableRows}</tbody></table></div>
+        <p class="table-note">左右拖动表格可查看全部评分。满分 5 分；综合等级按这次“山水＋寺观＋慢住”的需求判断。</p>
+        <div class="closing"><b>第一梯队：</b>齐云山＋徽州、九华山＋青阳、武当山。<br>如果更重视漂亮山景，再重点看三清山；如果更重视交通省心，看雁荡山。</div>
+      </section>`;
+    }
+
+    deck.innerHTML = coverHTML() + places.map(placeHTML).join("") + summaryHTML();
+    const panels = [...document.querySelectorAll(".panel")];
+    progress.innerHTML = "";
+
+    function showToast(message) {
+      toast.textContent = message; toast.classList.add("show");
+      clearTimeout(showToast.timer); showToast.timer = setTimeout(() => toast.classList.remove("show"), 1800);
+    }
+    function setGalleryIndex(gallery, requestedIndex) {
+      const track = gallery.querySelector("[data-gallery-track]");
+      const slides = [...gallery.querySelectorAll(".photo-slide")];
+      const index = Math.max(0, Math.min(slides.length - 1, requestedIndex));
+      gallery.dataset.index = index;
+      track.style.setProperty("--photo-index", index);
+      gallery.querySelectorAll(".gallery-dot").forEach((dot,i) => dot.classList.toggle("active", i === index));
+      gallery.querySelector(".gallery-counter b").textContent = index + 1;
+      gallery.querySelector(".gallery-arrow.prev").disabled = index === 0;
+      gallery.querySelector(".gallery-arrow.next").disabled = index === slides.length - 1;
+    }
+    function refreshPicks() {
+      localStorage.setItem("mountainTripPicks", JSON.stringify([...selected]));
+      document.querySelectorAll("[data-pick]").forEach(btn => {
+        const yes = selected.has(btn.dataset.pick); btn.setAttribute("aria-pressed", yes); btn.textContent = yes ? "✓ 已选" : "＋ 想去";
+      });
+      const box = document.getElementById("myPicks");
+      box.innerHTML = selected.size ? [...selected].map((name,i) => `${i+1}. ${name}`).join("<br>") : `<span class="empty">还没有选择。向右滑回候选卡片，最多勾选 3 个。</span>`;
+      selectionStatus.innerHTML = `已选 <b>${selected.size}</b> / 3`;
+    }
+    deck.addEventListener("click", e => {
+      const photoStep = e.target.closest("[data-photo-step]");
+      if (photoStep) {
+        const gallery = photoStep.closest(".gallery");
+        setGalleryIndex(gallery, Number(gallery.dataset.index || 0) + Number(photoStep.dataset.photoStep));
+        return;
+      }
+      const photoDot = e.target.closest("[data-photo-go]");
+      if (photoDot) {
+        const gallery = photoDot.closest(".gallery");
+        setGalleryIndex(gallery, Number(photoDot.dataset.photoGo));
+        return;
+      }
+      const pick = e.target.closest("[data-pick]");
+      if (pick) {
+        const name = pick.dataset.pick;
+        if (selected.has(name)) selected.delete(name);
+        else if (selected.size >= 3) { showToast("最多先选 3 个"); return; }
+        else selected.add(name);
+        refreshPicks();
+      }
+      const copy = e.target.closest("#copyPicks");
+      if (copy) {
+        if (!selected.size) { showToast("先选出想去的地方"); return; }
+        const text = `我看完九月山水旅行候选了，我的 Top ${selected.size} 是：${[...selected].join("、")}。`;
+        navigator.clipboard?.writeText(text).then(() => showToast("选择结果已复制"), () => showToast("长按上方文字复制"));
+      }
+    });
+    selectionStatus.addEventListener("click", () => document.querySelector(".summary").scrollIntoView({behavior:"smooth"}));
+    refreshPicks();
+
+    document.querySelectorAll(".gallery").forEach(gallery => {
+      const track = gallery.querySelector("[data-gallery-track]");
+      let startX = null;
+      setGalleryIndex(gallery, 0);
+      track.addEventListener("pointerdown", e => { startX = e.clientX; e.stopPropagation(); }, {passive:true});
+      track.addEventListener("pointerup", e => {
+        if (startX === null) return;
+        const delta = e.clientX - startX;
+        if (Math.abs(delta) > 42) setGalleryIndex(gallery, Number(gallery.dataset.index || 0) + (delta < 0 ? 1 : -1));
+        startX = null;
+        e.stopPropagation();
+      }, {passive:true});
+      track.addEventListener("pointercancel", () => { startX = null; }, {passive:true});
+    });
+  </script>
+</body>
+</html>
